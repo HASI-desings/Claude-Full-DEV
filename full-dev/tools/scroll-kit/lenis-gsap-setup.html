@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lenis and GSAP setup</title>
+<!--
+  DEMO: the canonical Lenis smooth-scroll + GSAP ScrollTrigger wiring, plus teardown.
+  Use Lenis only when the motion spec says the experience needs it (long scrubbed
+  stories, parallax-heavy pages). It is not a default.
+
+  Section map
+    1. Tokens          — demo values; replace with the project's tokens.css.
+    2. Lenis CSS       — lenis.css is REQUIRED (html.lenis rules: height:auto, no smooth-behaviour clash).
+    3. Markup          — anchor nav, a parallax block and a pinned block to prove the sync.
+    4. Script
+       4a. guard       — reduced motion → don't create Lenis at all (native scroll).
+       4b. Lenis       — autoRaf: false because GSAP's ticker drives it (one rAF loop, not two).
+       4c. sync        — lenis.on('scroll', ScrollTrigger.update); gsap.ticker.add(t => lenis.raf(t*1000));
+                         gsap.ticker.lagSmoothing(0)   ← from the Lenis README.
+       4d. anchors     — lenis.scrollTo for in-page links (keeps easing + offsets for a fixed header).
+       4e. triggers    — normal ScrollTriggers; nothing Lenis-specific needed once synced.
+       4f. teardown    — destroy(): kill triggers, remove ticker fn, lenis.destroy(). Call on route change.
+  Known limits (Lenis README): no CSS scroll-snap (use lenis/snap), capped to 60fps on Safari,
+  iframes don't forward wheel events. Nested scroll areas need data-lenis-prevent.
+-->
+<!-- ── 2. Lenis CSS + scripts (exact versions) ── -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.27/dist/lenis.css">
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.27/dist/lenis.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.1/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.1/dist/ScrollTrigger.min.js"></script>
+<style>
+  /* ── 1. Tokens (demo only) ─────────────────────────────── */
+  :root {
+    --bg: #e8ecef; --surface: #d3dbe1; --ink: #16202b; --ink-muted: #4a5866; --accent: #1f6f78;
+    --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --header-h: 56px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); }
+  header { position: fixed; inset: 0 0 auto 0; height: var(--header-h); display: flex; gap: 1.5rem; align-items: center; padding: 0 6vw; background: rgb(232 236 239 / .9); z-index: 10; }
+  header a { color: var(--ink); text-decoration: none; font-weight: 600; }
+  header a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  section { min-height: 90vh; padding: calc(var(--header-h) + 8vh) 6vw 8vh; }
+  h1, h2 { line-height: 1; letter-spacing: -0.02em; margin: 0 0 .4em; }
+  h1 { font-size: clamp(2.4rem, 8vw, 6rem); }
+  h2 { font-size: clamp(1.6rem, 4vw, 3rem); }
+  p { color: var(--ink-muted); line-height: 1.6; max-width: 52ch; }
+  .parallax { position: relative; height: 80vh; overflow: hidden; background: var(--ink); }
+  .parallax .plate { position: absolute; inset: -20% 10%; background: linear-gradient(160deg, var(--accent), #0e3a40); }
+  .parallax h2 { position: relative; color: #f4f6f8; padding: 30vh 6vw 0; }
+  .pinbox { display: grid; place-items: center; }
+  .pinbox .disc { width: min(40vw, 320px); aspect-ratio: 1; border-radius: 50%; background: var(--accent); }
+  .scroller { height: 160px; overflow: auto; background: var(--surface); padding: 1rem; max-width: 40ch; }
+</style>
+</head>
+<body>
+  <!-- ── 3. Markup ──────────────────────────────────────────── -->
+  <header>
+    <a href="#intro">Intro</a><a href="#depth">Depth</a><a href="#pin">Pin</a><a href="#end">End</a>
+  </header>
+
+  <section id="intro">
+    <h1>Smooth, synced</h1>
+    <p>Lenis eases the scroll; ScrollTrigger reads Lenis' position every frame, so pins and scrubs never drift.</p>
+    <!-- Nested scroll areas must opt out or Lenis will hijack their wheel events. -->
+    <div class="scroller" data-lenis-prevent tabindex="0" aria-label="Nested scroll area">
+      <p>This box scrolls on its own (data-lenis-prevent).</p><p>Line</p><p>Line</p><p>Line</p><p>Line</p><p>Line</p>
+    </div>
+  </section>
+
+  <section id="depth" class="parallax" aria-label="Parallax">
+    <div class="plate" id="plate" aria-hidden="true"></div>
+    <h2>Parallax plate</h2>
+  </section>
+
+  <section id="pin" class="pinbox" aria-label="Pinned">
+    <div class="disc" id="disc" aria-hidden="true"></div>
+  </section>
+
+  <section id="end"><h2>End</h2><p>Use the header links: anchors go through lenis.scrollTo with a header offset.</p></section>
+
+<script>
+  gsap.registerPlugin(ScrollTrigger);
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let lenis = null, tickerFn = null;
+
+  // ── 4a + 4b. Create Lenis only when motion is welcome ───────
+  if (!reduce) {
+    lenis = new Lenis({ autoRaf: false, lerp: 0.1 });          // lerp 0.1 = default feel; lower = floatier
+
+    // ── 4c. Sync (verbatim pattern from the Lenis README) ─────
+    lenis.on('scroll', ScrollTrigger.update);
+    tickerFn = (time) => lenis.raf(time * 1000);               // GSAP ticker is in seconds, Lenis wants ms
+    gsap.ticker.add(tickerFn);
+    gsap.ticker.lagSmoothing(0);                                // no catch-up jumps after a dropped frame
+  }
+
+  // ── 4d. Anchor links ───────────────────────────────────────
+  const headerH = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 0;
+  document.querySelectorAll('header a[href^="#"]').forEach((a) => {
+    a.addEventListener('click', (e) => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (!target) return;
+      e.preventDefault();
+      if (lenis) lenis.scrollTo(target, { offset: -headerH() });
+      else target.scrollIntoView();                             // reduced motion: instant jump
+      history.replaceState(null, '', a.getAttribute('href'));
+      target.setAttribute('tabindex', '-1'); target.focus({ preventScroll: true });   // keyboard users land there too
+    });
+  });
+
+  // ── 4e. Ordinary ScrollTriggers ─────────────────────────────
+  if (!reduce) {
+    gsap.to('#plate', { yPercent: 18, ease: 'none', scrollTrigger: { trigger: '#depth', start: 'top bottom', end: 'bottom top', scrub: true } });
+    gsap.to('#disc', { scale: 0.4, rotate: 180, borderRadius: '24%', ease: 'none',
+      scrollTrigger: { trigger: '#pin', start: 'top top', end: '+=120%', pin: true, scrub: 0.5, anticipatePin: 1 } });
+  }
+
+  // ── 4f. Teardown (SPA route change / component unmount) ────
+  window.__lenisCleanup = function destroy() {
+    ScrollTrigger.getAll().forEach((t) => t.kill());            // in React prefer useGSAP() / gsap.context().revert()
+    if (tickerFn) gsap.ticker.remove(tickerFn);
+    if (lenis) { lenis.destroy(); lenis = null; }
+  };
+</script>
+</body>
+</html>

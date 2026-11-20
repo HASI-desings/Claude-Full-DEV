@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSS scroll timelines</title>
+<!--
+  DEMO: scroll-driven animation with ZERO JavaScript (animation-timeline: scroll() / view()).
+  Runs off the main thread for transform/opacity/clip-path, so it stays smooth while JS is busy.
+  Support: Chrome/Edge 115+, Safari 26+, Firefox 159+ (Baseline newly available, late 2026).
+
+  Section map
+    1. Tokens            — demo values; replace with the project's tokens.css.
+    2. Base (final state) — everything is written in its FINISHED, readable state first.
+                           Old browsers and reduced-motion users get exactly this.
+    3. Enhancement       — all motion inside
+                             @supports (animation-timeline: view())
+                             and @media (prefers-reduced-motion: no-preference)
+       3a. reading progress bar — scroll(root) timeline on scaleX.
+       3b. reveal on enter      — view() + animation-range: entry.
+       3c. parallax layer       — view() across the whole cover range.
+       3d. clip-path wipe       — image reveals as it crosses the viewport.
+       3e. sticky scale         — a sticky element shrinks over its container (named view-timeline).
+    4. Markup
+  Rule: never put content-critical state in the keyframes' "from" alone. If the
+  animation never runs, the element must still be visible.
+-->
+<style>
+  /* ── 1. Tokens (demo only) ─────────────────────────────── */
+  :root {
+    --bg: #e8ecef; --surface: #d3dbe1; --ink: #16202b; --ink-muted: #4a5866; --accent: #1f6f78;
+    --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+
+  /* ── 2. Base = final state ─────────────────────────────── */
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); }
+  .progress { position: fixed; inset: 0 0 auto 0; height: 4px; background: var(--accent); transform-origin: 0 50%; z-index: 10; }
+  section { padding: 14vh 6vw; }
+  .hero { min-height: 90vh; display: grid; align-content: center; }
+  h1, h2 { line-height: 1; letter-spacing: -0.02em; margin: 0 0 .4em; }
+  h1 { font-size: clamp(2.4rem, 8vw, 6rem); }
+  h2 { font-size: clamp(1.6rem, 4vw, 3rem); }
+  p { color: var(--ink-muted); line-height: 1.6; max-width: 52ch; }
+  .reveal-list { display: grid; gap: 4vh; max-width: 70ch; margin: 0 auto; }
+  .reveal { padding: 4vh 4vw; background: var(--surface); border-left: 4px solid var(--accent); }
+  .depth { position: relative; height: 80vh; overflow: hidden; background: var(--ink); }
+  .depth .layer { position: absolute; inset: -15% 0; display: grid; place-items: center; }
+  .depth .back  { color: #2b3a4a; font-size: 30vw; font-weight: 800; line-height: 1; }
+  .depth .front { color: #f4f6f8; font-size: clamp(1.4rem, 3vw, 2.4rem); }
+  .wipe { height: 70vh; background: linear-gradient(135deg, var(--accent), var(--ink)); }
+  .sticky-wrap { height: 220vh; view-timeline-name: --shrink; }
+  .sticky-card { position: sticky; top: 10vh; height: 80vh; background: var(--surface); display: grid; place-items: center; transform-origin: 50% 0; }
+
+  /* ── 3. Enhancement: only where supported AND wanted ───── */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+
+      /* 3a. Reading progress */
+      .progress { animation: grow linear both; animation-timeline: scroll(root block); }
+      @keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+      /* 3b. Reveal as each item enters (0% → 60% of its entry) */
+      .reveal { animation: rise both cubic-bezier(0.23, 1, 0.32, 1); animation-timeline: view(); animation-range: entry 0% entry 60%; }
+      @keyframes rise { from { opacity: 0; transform: translateY(40px) scale(.97); } }
+
+      /* 3c. Parallax: back layer moves more than the front */
+      .depth .back  { animation: drift-back linear both;  animation-timeline: view(); animation-range: cover; }
+      .depth .front { animation: drift-front linear both; animation-timeline: view(); animation-range: cover; }
+      @keyframes drift-back  { from { transform: translateY(-12%); } to { transform: translateY(12%); } }
+      @keyframes drift-front { from { transform: translateY(6%); }   to { transform: translateY(-6%); } }
+
+      /* 3d. Clip-path wipe while the block crosses the viewport */
+      .wipe { animation: wipe both linear; animation-timeline: view(); animation-range: entry 10% cover 50%; }
+      @keyframes wipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+
+      /* 3e. Named timeline: card shrinks while its wrapper scrolls past */
+      .sticky-card { animation: shrink linear both; animation-timeline: --shrink; animation-range: contain 0% contain 100%; }
+      @keyframes shrink { to { transform: scale(.82); border-radius: 32px; } }
+    }
+  }
+</style>
+</head>
+<body>
+  <!-- ── 4. Markup ──────────────────────────────────────────── -->
+  <div class="progress" aria-hidden="true"></div>
+
+  <section class="hero">
+    <h1>Pure CSS scroll</h1>
+    <p>No JavaScript on this page. Everything moves on the compositor, and everything is readable when it doesn't.</p>
+  </section>
+
+  <section>
+    <div class="reveal-list">
+      <div class="reveal"><h2>Enters once</h2><p>view() timelines measure the element against the viewport.</p></div>
+      <div class="reveal"><h2>Reverses for free</h2><p>Scroll back up and the animation runs backwards, no code.</p></div>
+      <div class="reveal"><h2>Degrades cleanly</h2><p>Unsupported browsers render this final state.</p></div>
+    </div>
+  </section>
+
+  <section class="depth" aria-label="Depth">
+    <div class="layer back" aria-hidden="true">DEPTH</div>
+    <div class="layer front"><p style="color:inherit">Two layers, two speeds.</p></div>
+  </section>
+
+  <section><div class="wipe" role="img" aria-label="Colour panel revealed left to right"></div></section>
+
+  <section class="sticky-wrap">
+    <div class="sticky-card"><h2>Named timeline</h2></div>
+  </section>
+
+  <section><h2>End</h2><p>The progress bar at the top is full.</p></section>
+</body>
+</html>

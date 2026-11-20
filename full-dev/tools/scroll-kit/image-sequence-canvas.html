@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Canvas image sequence</title>
+<!--
+  DEMO: scroll position → frame index → drawImage on a <canvas> (Apple-style).
+
+  Section map
+    1. Tokens         — demo values; replace with the project's tokens.css.
+    2. Layout         — tall track + sticky stage, canvas fills the stage.
+    3. Markup         — <canvas> with a text alternative + a loading meter.
+    4. Script
+       4a. manifest   — frames/manifest.json from ../extract-frames.sh (count, sizes, paths).
+       4b. canvas     — size to CSS box × devicePixelRatio (capped at 2).
+       4c. preload    — PROGRESSIVE: every 8th frame first, then 4th, 2nd, rest.
+                        Any scroll position always has a nearby frame to show.
+       4d. draw       — "cover" fit; nearest loaded frame if the exact one isn't ready.
+       4e. progress   — scroll → frame index; redraw only when the index changes.
+       4f. reduced motion — draw one meaningful frame, no pin.
+
+  Memory: decoded frames cost width × height × 4 bytes each (1280×720 ≈ 3.7 MB).
+  HTMLImageElement lets the browser evict decoded data; ImageBitmap arrays do not.
+  Keep ≤ ~150 frames and use the mobile set under 768px.
+-->
+<style>
+  /* ── 1. Tokens (demo only) ─────────────────────────────── */
+  :root {
+    --bg: #e8ecef; --ink: #16202b; --ink-muted: #4a5866; --accent: #1f6f78;
+    --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); }
+  section.copy { min-height: 70vh; display: grid; place-content: center; padding: 10vh 6vw; max-width: 60ch; margin: 0 auto; }
+  h1 { font-size: clamp(2rem, 6vw, 4.5rem); line-height: 1; margin: 0 0 .4em; letter-spacing: -0.02em; }
+  p { color: var(--ink-muted); line-height: 1.6; }
+
+  /* ── 2. Layout ─────────────────────────────────────────── */
+  .seq-track { position: relative; height: 400vh; }
+  .seq-stage { position: sticky; top: 0; height: 100vh; height: 100dvh; overflow: hidden; background: var(--ink); }
+  .seq-stage canvas { width: 100%; height: 100%; display: block; }
+  .meter { position: absolute; left: 0; bottom: 0; height: 3px; width: calc(var(--loaded, 0) * 100%); background: var(--accent); transition: width .2s; }
+  .readout { position: absolute; top: 16px; right: 16px; font: 12px/1 var(--font); color: #f4f6f8; opacity: .7; }
+
+  /* ── 4f. Reduced motion ────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .seq-track { height: auto; }
+    .seq-stage { position: relative; height: 70vh; }
+  }
+</style>
+</head>
+<body>
+  <section class="copy">
+    <h1>Frame by frame</h1>
+    <p>A numbered image sequence painted onto a canvas as you scroll. Exact on every browser, including iOS Safari.</p>
+  </section>
+
+  <!-- ── 3. Markup: role="img" + label gives the canvas a text alternative ── -->
+  <div class="seq-track" id="track">
+    <div class="seq-stage">
+      <canvas id="seq" role="img" aria-label="A light square travels in an arc across a shifting colour field."></canvas>
+      <span class="meter" id="meter" aria-hidden="true"></span>
+      <span class="readout" id="readout" aria-hidden="true">frame –</span>
+    </div>
+  </div>
+
+  <section class="copy">
+    <h1>After the sequence</h1>
+    <p>Normal flow resumes once the track ends.</p>
+  </section>
+
+<script>
+(async () => {
+  const BASE = 'assets/frames/';
+  const canvas = document.getElementById('seq');
+  const ctx = canvas.getContext('2d');
+  const track = document.getElementById('track');
+  const meter = document.getElementById('meter');
+  const readout = document.getElementById('readout');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ── 4a. Manifest ──────────────────────────────────────────
+  const manifest = await fetch(BASE + 'manifest.json').then(r => r.json());
+  const set = (window.innerWidth < 768 && manifest.mobile) ? manifest.mobile : manifest.desktop;
+  const url = i => `${BASE}${set.path}${manifest.prefix}${String(i + 1).padStart(manifest.pad, '0')}.${manifest.ext}`;
+  const frames = new Array(manifest.count);           // HTMLImageElement | undefined
+  const ready = new Uint8Array(manifest.count);      // 1 when decoded
+
+  // ── 4b. Canvas sizing (CSS box × DPR, capped) ─────────────
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const { width, height } = canvas.getBoundingClientRect();
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    lastDrawn = -1; render();
+  }
+
+  // ── 4d. Draw ("cover" fit; nearest ready frame) ───────────
+  function nearestReady(i) {
+    for (let d = 0; d < manifest.count; d++) {
+      if (i - d >= 0 && ready[i - d]) return i - d;
+      if (i + d < manifest.count && ready[i + d]) return i + d;
+    }
+    return -1;
+  }
+  let lastDrawn = -1;
+  function draw(i) {
+    const j = nearestReady(i);
+    if (j < 0 || j === lastDrawn) return;
+    const img = frames[j];
+    const s = Math.max(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
+    const w = img.naturalWidth * s, h = img.naturalHeight * s;
+    ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
+    lastDrawn = j;
+    readout.textContent = `frame ${j + 1}/${manifest.count}`;
+  }
+
+  // ── 4e. Scroll → frame index ──────────────────────────────
+  function frameForScroll() {
+    const r = track.getBoundingClientRect();
+    const distance = r.height - window.innerHeight;
+    const p = distance > 0 ? Math.min(1, Math.max(0, -r.top / distance)) : 0;
+    return Math.round(p * (manifest.count - 1));
+  }
+  let wanted = 0, queued = false;
+  function render() { draw(wanted); }
+  function onScroll() {
+    wanted = reduce ? Math.floor(manifest.count / 2) : frameForScroll();
+    if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; render(); }); }
+  }
+
+  // ── 4c. Progressive preload ───────────────────────────────
+  // Order: 0, 8, 16… then 4, 12… then 2, 6… then the odd ones. 6 requests in flight.
+  function loadOrder(n) {
+    const order = [], seen = new Set();
+    for (const step of [8, 4, 2, 1]) for (let i = 0; i < n; i += step) if (!seen.has(i)) { seen.add(i); order.push(i); }
+    if (!seen.has(n - 1)) order.push(n - 1);
+    return order;
+  }
+  function load(i) {
+    return new Promise(res => {
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = url(i);
+      img.decode().then(() => { frames[i] = img; ready[i] = 1; }).catch(() => {}).finally(res);
+    });
+  }
+  async function preload(indices, concurrency = 6) {
+    let done = 0, next = 0;
+    const worker = async () => {
+      while (next < indices.length) {
+        const i = indices[next++];
+        await load(i);
+        meter.style.setProperty('--loaded', (++done / indices.length).toFixed(3));
+        if (Math.abs(i - wanted) <= 8) { lastDrawn = -1; render(); }   // a closer frame arrived
+      }
+    };
+    await Promise.all(Array.from({ length: concurrency }, worker));
+  }
+
+  // ── 4f. Reduced motion: one frame, no scroll binding ──────
+  const order = reduce ? [Math.floor(manifest.count / 2)] : loadOrder(manifest.count);
+  wanted = reduce ? order[0] : frameForScroll();
+  resize();
+  window.addEventListener('resize', resize);
+  if (!reduce) window.addEventListener('scroll', onScroll, { passive: true });
+  await preload(order);
+  render();
+  document.documentElement.dataset.seqReady = '1';
+
+  // Cleanup hook for SPAs (call on route change).
+  window.__seqCleanup = () => {
+    window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', resize);
+    frames.fill(undefined);
+  };
+})();
+</script>
+</body>
+</html>
