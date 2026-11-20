@@ -2,7 +2,7 @@
 
 Animation is designed, not sprinkled. "Make it smooth and animated" is never a spec. Deliverable: `docs/full-dev/07-motion-spec.md` (template: `templates/07-motion-spec.md`) + motion references. ★ Gate.
 
-Deep dives: `library/emil/animate`, `library/emil/choreograph`, `library/emil/find-animation-opportunities`, `library/emil/animation-performance`, `library/emil/review-animations`, `library/emil/gestures`, `library/emil/animation-vocabulary`, `library/vercel/react-view-transitions`, engine `--domain gsap`.
+Deep dives: `library/emil/animate`, `library/emil/choreograph`, `library/emil/find-animation-opportunities`, `library/emil/animation-performance`, `library/emil/review-animations`, `library/emil/gestures`, `library/emil/animation-vocabulary`, `library/vercel/react-view-transitions`, engine `--domain gsap`. Scroll, video, 3D and interaction: **`references/scroll-video-interaction.md`** (decision tree, budgets, recipes) + working demos in `tools/scroll-kit/`; GSAP: `library/gsap/*` (official); 3D: `library/threejs/*`; scroll systems: `library/mengto/*`. Ready-made components: **`references/component-sources.md`**.
 
 ## 1. Gate every animation (from Emil Kowalski's method)
 1. **Should it animate at all?** Seen 100+×/day or keyboard-triggered → no animation. Tens/day → near-imperceptible. Occasional (modal, drawer) → standard. Rare/first-time (hero load, onboarding, success) → this is where the delight budget lives.
@@ -15,6 +15,28 @@ For each section, a table with one row per moving element:
 | Element | Role (lead/support/decoration) | Trigger | From | To | Duration | Delay/stagger | Easing | Scroll relation | Exit | Reduced-motion | Mobile |
 
 Trigger = load, enter viewport (at what %), scroll-scrub (start/end positions), hover, click, drag, route change. From/To = position, scale, rotation, opacity, clip-path/mask.
+
+### Scroll, video and interactive rows
+Scroll-bound effects need more than the table above. For each one, also fill the *Scroll & video* table in the template:
+
+| Field | Meaning | Example |
+|---|---|---|
+| Technique | from the decision tree in `scroll-video-interaction.md` | CSS view() · GSAP pin+scrub · video scrub · canvas sequence · Three.js · WebCodecs |
+| Trigger range | start/end as `<element edge> <viewport edge>` | `top top` → `+=250%` |
+| Pin | what pins and for how long (viewports, desktop / mobile) | stage, 2.5 / 1.6 |
+| Scrub smoothing | `true` (none) or catch-up seconds | 0.6 |
+| Snap | none / labels / progress steps | labels |
+| Frames / duration | for video & sequences | 4 s @ 30 fps · 120 frames |
+| Asset | file, resolution, codec, size budget, poster (Phase 8) | hero-desktop.mp4 1920 H.264 all-intra ≤ 6 MB |
+| Interaction | pointer/drag/gesture mapping | tilt ±8°, damped 0.12, fine pointer only |
+| Mobile | the designed alternative | vertical stack, 800 px frames |
+| Reduced motion | the static state | poster frame, no pin |
+| Fallback | no WebGL / no `animation-timeline` / video error | still image |
+
+Patterns, with demos to start from: pinned storytelling, horizontal scroll, text/mask reveals, parallax depth, scroll-scrubbed video, canvas image sequences, cursor/magnetic, drag/physics, 3D tied to scroll, shared-element transitions (all in `scroll-video-interaction.md` §5).
+
+### Borrowed components
+If a row uses a library component, name it (source + component), its license, and what changes to fit the concept. A row that says only "use Aceternity spotlight" is not a spec.
 
 ## 3. Defaults that keep it feeling right
 - Animate `transform` and `opacity` (and `clip-path`); never layout properties; never `transition: all`.
@@ -33,9 +55,11 @@ Trigger = load, enter viewport (at what %), scroll-scrub (start/end positions), 
 - **Process:** an SVG path draws with scroll progress; step numbers appear as the path reaches them; content enters progressively.
 - **Images:** mask/clip-path reveals; parallax at different speeds; scale/reposition tied to scroll progress.
 - **Transitions:** sections linked by shared elements; backgrounds morph; an object travels between sections; type and graphics keep continuity across routes (View Transitions API / shared layout).
+- **Scroll-scrubbed media:** product footage or a CG render scrubbed by scroll (`video-scrub.html` / `image-sequence-canvas.html`); a 3D object whose pose follows scroll (`scroll-3d-object.html`).
+- **Chapters:** a pinned stage where a visual transforms through labelled chapters (`pinned-storytelling.html`); a horizontal track for a row-shaped collection (`horizontal-scroll.html`).
 
 ## 5. Motion references
-Words can't carry complex timing. Get or make a reference: Figma prototype/Motion (read via `get_motion_context` if Figma MCP exists), After Effects export, screen recording of a reference site (record it yourself with the browser tool/GIF capture when available), or a quick CodePen-style prototype you build and show. Store references next to the spec. When implementing, compare against them frame by frame.
+Words can't carry complex timing. Use the motion captures from Phase 3 (`docs/full-dev/motion-refs/`). Get or make a reference: Figma prototype/Motion (read via `get_motion_context` if Figma MCP exists), After Effects export, screen recording of a reference site (record it yourself with the browser tool/GIF capture when available), or a quick prototype you build from the matching `tools/scroll-kit/` demo and show. Store references next to the spec. When implementing, compare against them frame by frame.
 
 ## 6. Present
 Show the spec table per section plus a storyboard (key frames as sketches/screens) or a working prototype of the hero sequence. Get approval before implementation.

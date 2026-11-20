@@ -28,4 +28,12 @@ Test at **375×667, 390×844, 430×932** (phones), **768×1024, 1024×1366** (ta
 9. Safe areas / notches, `100dvh` instead of `100vh`
 10. Landscape orientation doesn't break
 
+## Scroll performance pass (every scroll-bound section)
+- **60 fps on a mid-range phone** (e.g. a 2–3-year-old Android): Chrome DevTools Performance panel with 4× CPU throttle as a first check, then a real device via remote debugging. No long tasks > 50 ms while scrolling; no layout/paint in the scroll frames (only composite).
+- **Memory:** heap and GPU memory stable after scrolling the page 3× top↔bottom (frame sequences, video blobs, WebGL textures). Rising = a leak or missing dispose.
+- **Resize / rotate / refresh:** pins, horizontal tracks and scrub ranges still correct after window resize, phone rotation, reload mid-page, and after fonts/images load (`ScrollTrigger.refresh()` hooked up).
+- **iOS Safari:** video shows (muted/playsinline), scrubs both ways, sticky stages use `dvh`, no jump when the toolbar collapses, no rubber-band artefacts at pin edges. Test on a device or a cloud device service; say so if you couldn't.
+- **Reduced motion:** emulate it — every section readable, nothing pinned, no scrub, no Lenis.
+- Fix order: lighter asset → fewer layers → lower DPR → simpler technique on mobile (the spec's mobile column).
+
 If the automatic responsive result is poor: design a dedicated mobile frame for that section (Figma via MCP or an HTML sketch), get approval, then implement exactly that layout. The visual identity stays consistent across devices even when compositions differ.

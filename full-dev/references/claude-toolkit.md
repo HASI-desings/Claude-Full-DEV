@@ -16,6 +16,9 @@ The same skill runs in **Claude Code** (terminal, files, git) and in the **Claud
 | **Supabase MCP** | `list_projects`, `apply_migration`, `execute_sql`, `list_tables`, `generate_typescript_types`, `get_advisors`, `deploy_edge_function`, `search_docs` | Schema migrations, RLS policies, typed client, security/perf advisors | SQL migration files + instructions |
 | **GitHub** | `gh` authenticated, GitHub MCP, or a repo-attach tool | Create repo, commit, push, open PRs, connect to Vercel | Git commands for the user; or ask them to create an empty repo you can push to |
 | **Memory / project files** | memory tools, `CLAUDE.md`, `docs/full-dev/` | Persist decisions across sessions | Keep everything in the deliverable docs |
+| **21st.dev Magic MCP** | tools from a `magic`/`21st` MCP server (e.g. component search / builder / inspiration) | Search and pull community React components by effect name into the project; generate variants | Browse 21st.dev and copy via the shadcn registry URL; or build from `references/component-sources.md` sources. Setup (user's machine): `npx @21st-dev/cli@latest install claude --api-key <key>` with a key from 21st.dev/mcp |
+| **ffmpeg** | `ffmpeg -version` in a terminal | Encode all-keyframe scrub video, extract frame sequences, posters (`tools/scroll-kit/*.sh`), convert screen recordings to GIF | Ask the user to run the scripts locally; or use pre-encoded assets; or online converters with the same settings (`-g 1`, no audio) |
+| **Browser screen recording** | browser tool with GIF/recording, or Playwright `recordVideo` | Capture motion references of inspiration sites (Phase 3) and of our build for review (Phases 7, 10) | Screenshots at 0/25/50/75/100% of the scroll range; or ask the user for a phone screen recording |
 | **Scheduled tasks** | scheduling / trigger tools | Phase 13: periodic uptime, Lighthouse, dependency and broken-link checks | Give the user a maintenance checklist |
 
 ## Operating principles

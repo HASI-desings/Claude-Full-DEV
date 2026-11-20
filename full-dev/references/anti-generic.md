@@ -20,6 +20,21 @@ Run this before presenting any design-system, page design or built section. If a
 
 All of these are legitimate *when chosen* for a brief. They fail when they're defaults.
 
+## Component-library defaults (unadapted)
+Borrowed components are the fastest route to a generic site. Each of these, in its library's default look, now reads as "AI landing page":
+15. **Spotlight / glow-follow cards** — radial highlight tracking the cursor on dark cards.
+16. **Beam or animated-gradient borders** — light running around a card or button edge.
+17. **Bento grid** — mixed-size rounded tiles as the default feature section.
+18. **Marquee logo strip** — infinite scrolling client logos (worse with invented logos).
+19. **Typewriter / word-rotate headline** — cycling words with a blinking cursor.
+20. **Shimmer / shiny buttons** — a sheen sweeping across the CTA.
+21. **Number tickers counting up** on stats (see #7).
+22. **Dot/grid/meteor/particle backgrounds** behind the hero.
+23. **3D tilt cards and floating dock nav** used decoratively.
+24. **Text-generate / blur-in word effects** on every heading.
+
+Test: could someone name the library from a screenshot? Then apply the adaptation rule in `component-sources.md` — tokens, a concept-driven structural change, extras removed — or drop it.
+
 ## The swap test
 Replace the logo and name with a competitor's. If the page still works unchanged, it isn't designed for this company yet.
 

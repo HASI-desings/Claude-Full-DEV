@@ -18,6 +18,15 @@ Deep dives: `library/anthropic/webapp-testing` (Playwright helper scripts), `lib
 
 **Motion** — smooth on a mid-range device, no glitches or flashes on load, transitions correct when interrupted, scroll triggers in sync after resize/refresh, reduced-motion renders everything readable.
 
+**Scroll & media performance** (evidence for each)
+- 60 fps while scrolling every scroll-bound section on a mid-range phone (Performance trace / FPS meter screenshot); no long tasks > 50 ms during scroll.
+- Memory flat after 3 full scroll passes (heap snapshot / Performance monitor); WebGL contexts ≤ 1, disposed on route change.
+- No jank or wrong positions after resize, rotate and reload mid-page.
+- iOS Safari: scrub video and canvas sequences work both directions; no blank video; `dvh` stages stable.
+- Reduced motion: screenshots of each scroll section with `prefers-reduced-motion: reduce` emulated.
+- Asset budgets met (scrub video ≤ 6 MB desktop / 2.5 MB mobile; sequences per Phase 8); poster is the LCP element and LCP < 2.5 s on 4G.
+- Borrowed components: each listed with license and attribution in `THIRD_PARTY_NOTICES.md`; none left in its library-default look.
+
 **Technical**
 - Responsive at all Phase 10 sizes; no horizontal overflow
 - Accessibility: WCAG 2.2 AA — automated scan clean, plus manual keyboard-only pass and a screen-reader spot check (automated tools catch only ~30–40%)

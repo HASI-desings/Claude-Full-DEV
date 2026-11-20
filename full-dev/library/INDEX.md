@@ -1,6 +1,6 @@
 # Library Index — original specialist skills
 
-Each folder is an original open-source skill, copied unmodified except `SKILL.md` → `GUIDE.md` (so it loads only through Full Dev, not as a separate skill) and internal references updated to match. Open a guide only when a phase needs that depth. When a guide mentions another skill by name (e.g. `superpowers:writing-plans`), use the matching folder here if it exists; otherwise apply the principle directly.
+Each folder is an original open-source skill (95 in total), copied unmodified except `SKILL.md` → `GUIDE.md` (so it loads only through Full Dev, not as a separate skill) and internal references updated to match. Open a guide only when a phase needs that depth. When a guide mentions another skill by name (e.g. `superpowers:writing-plans`), use the matching folder here if it exists; otherwise apply the principle directly.
 
 | Phase | Guide | Use it for | Source |
 |---|---|---|---|
@@ -35,6 +35,34 @@ Each folder is an original open-source skill, copied unmodified except `SKILL.md
 | 7 / 11 | `emil/animation-performance` | Fixing dropped frames | emilkowalski/skills |
 | 7 / 10 | `emil/review-animations` | Strict motion review (Before/After/Why) | emilkowalski/skills |
 | 7 | `vercel/react-view-transitions` | Page/state transitions with the View Transitions API in React | vercel-labs/agent-skills (MIT) |
+| 7 / 9 | `gsap/gsap-core` | gsap.to/from/fromTo, easing, stagger, matchMedia | greensock/gsap-skills (MIT, official) |
+| 7 / 9 | `gsap/gsap-timeline` | Sequencing, position parameter, labels, nesting | greensock/gsap-skills |
+| 7 / 9 | `gsap/gsap-scrolltrigger` | Pin, scrub, snap, containerAnimation, refresh, cleanup | greensock/gsap-skills |
+| 7 / 9 | `gsap/gsap-plugins` | SplitText, Flip, Draggable, Observer, MorphSVG, ScrollSmoother… | greensock/gsap-skills |
+| 9 | `gsap/gsap-utils` | clamp, mapRange, interpolate, toArray, quickTo helpers | greensock/gsap-skills |
+| 9 | `gsap/gsap-react` | useGSAP, context, cleanup in React/Next.js | greensock/gsap-skills |
+| 9 | `gsap/gsap-frameworks` | Vue, Svelte, Nuxt lifecycles | greensock/gsap-skills |
+| 9 / 11 | `gsap/gsap-performance` | Transforms, will-change, batching, avoiding jank | greensock/gsap-skills |
+| 7 / 9 | `threejs/threejs-fundamentals` | Scene, camera, renderer, resize, render loop | cloudai-x/threejs-skills (MIT) |
+| 9 | `threejs/threejs-geometry` | Built-in and custom geometry, instancing | cloudai-x/threejs-skills |
+| 9 | `threejs/threejs-materials` | PBR, physical, shader materials | cloudai-x/threejs-skills |
+| 9 | `threejs/threejs-lighting` | Lights, shadows, environment maps | cloudai-x/threejs-skills |
+| 9 | `threejs/threejs-textures` | Texture types, UVs, colour space, compression | cloudai-x/threejs-skills |
+| 8 / 9 | `threejs/threejs-loaders` | GLTF/GLB, Draco, KTX2, loading managers | cloudai-x/threejs-skills |
+| 8 | `threejs/threejs-asset-pipeline` | Preparing and compressing 3D assets | cloudai-x/threejs-skills |
+| 7 / 9 | `threejs/threejs-animation` | Animation mixer, keyframes, procedural motion | cloudai-x/threejs-skills |
+| 7 / 9 | `threejs/threejs-interaction` | Raycasting, pointer, controls | cloudai-x/threejs-skills |
+| 9 | `threejs/threejs-shaders` | GLSL, ShaderMaterial, uniforms | cloudai-x/threejs-skills |
+| 9 | `threejs/threejs-postprocessing` | Bloom, DOF, custom passes | cloudai-x/threejs-skills |
+| 9 | `threejs/threejs-react-three-fiber` | R3F + Drei patterns in React | cloudai-x/threejs-skills |
+| 9 / 11 | `threejs/threejs-performance` | Draw calls, DPR, disposal, profiling | cloudai-x/threejs-skills |
+| 7 / 9 | `mengto/scroll-scrubbed-visual-sequence` | Reversible scroll-driven sequences: video, image sequence, canvas, SVG | MengTo/Skills (MIT) |
+| 7 / 9 | `mengto/cinematic-gsap-lenis-motion-system` | Full GSAP + ScrollTrigger + Lenis motion systems | MengTo/Skills |
+| 7 / 9 | `mengto/horizontal-scroll-scenes` | Scene-by-scene horizontal chapters driven by vertical scroll | MengTo/Skills |
+| 7 / 9 | `mengto/scroll-scrubbed-word-reveal` | Accessible word-by-word scroll reveals | MengTo/Skills |
+| 7 / 9 | `mengto/build-threejs-scroll-worlds` | Persistent Three.js worlds with a scroll conductor (demo images omitted) | MengTo/Skills |
+| 7 / 9 | `mengto/scroll-progress-timeline` | Data-driven scroll progress timelines | MengTo/Skills |
+| 10 / 11 | `mengto/optimize-web-animations` | Profiling animation jank and memory leaks | MengTo/Skills |
 | 8 Content | `marketing/copywriting` | Page copy, headlines, CTAs | coreyhaines31/marketingskills |
 | 8 | `marketing/copy-editing` | Tightening existing copy | coreyhaines31/marketingskills |
 | 8 | `marketing/content-strategy` | What content to make and why | coreyhaines31/marketingskills |
@@ -72,3 +100,6 @@ Each folder is an original open-source skill, copied unmodified except `SKILL.md
 | 13 | `vercel/verification` | End-to-end flow verification (browser → API → DB) | vercel/vercel-plugin |
 | 13 | `vercel/cdn-caching` | Caching diagnosis on Vercel | vercel/vercel-plugin |
 | 13 | `pdlc/caching-strategy` | Caching design | sethdford/claude-skills |
+
+
+Notes: `gsap/llms.txt` is GreenSock's index of its guides. Meng To guides ship without their `preview.jpg` images, and `mengto/build-threejs-scroll-worlds/demo/index.html` without its 3.2 MB image folder (see the upstream repo for the full demo). Working demos of our own live in `../tools/scroll-kit/`.

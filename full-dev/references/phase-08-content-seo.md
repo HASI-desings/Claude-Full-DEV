@@ -16,6 +16,17 @@ Deep dives: `library/marketing/copywriting`, `library/marketing/copy-editing`, `
 ## Assets
 List every image, video, illustration, icon, 3D model and font needed per section: source (client shoot, commissioned, licensed stock, generated, built in code), dimensions/ratio, format (AVIF/WebP, MP4/WebM, SVG, GLB), budget in KB, alt text. Prefer assets built in code (SVG, CSS, canvas) when they express the concept. Never use photos of real people or brands you have no rights to.
 
+### Video & frame-sequence specs (scroll-scrubbed media)
+| Item | Spec |
+|---|---|
+| Source | Shot/rendered at ≥ the largest output size, locked-off camera or smooth motion, no flicker; 4–6 s for scrub video |
+| Scrub video | `tools/scroll-kit/prepare-scrub-video.sh` → all-keyframe (`-g 1`, no B-frames), no audio, `+faststart`. Desktop 1920 (or 1280) wide ≤ 6 MB; mobile 960 wide ≤ 2.5 MB; MP4 H.264 for all + WebM VP9 for Chromium/Firefox; 24–30 fps |
+| Image sequence | `tools/scroll-kit/extract-frames.sh` → 60–150 frames; desktop ≤ 1600 px (~40–80 KB each), mobile ≤ 800 px; WebP q≈70 (AVIF if decode cost is tested); `manifest.json` |
+| Poster | First (or most meaningful) frame as WebP/JPG at display size — it is the LCP image, the reduced-motion still and the no-JS fallback. Preload it (`fetchpriority="high"`) if it's above the fold |
+| Background loop (non-scrub) | Normal encode (keyframe every ~2 s), `muted playsinline autoplay loop`, ≤ 2 MB, paused off-screen |
+| 3D | GLB, Draco/Meshopt compressed, ≤ 2–3 MB; textures KTX2/WebP ≤ 2048 px; a still render for fallback |
+| Alt / description | Every video/canvas gets a text alternative (`aria-label` or nearby caption); decorative ones `aria-hidden` |
+
 ## SEO & discoverability
 - One H1 per page; logical heading order; descriptive slugs.
 - Unique title (≤60 chars) and meta description (≤155) per page; Open Graph + Twitter cards with a designed OG image.

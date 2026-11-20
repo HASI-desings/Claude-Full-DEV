@@ -36,6 +36,19 @@ Max content width, column grid (desktop/tablet/mobile), spacing scale (e.g. 4/8-
 ## 5.5 Signature brand element(s)
 One or more recurring elements born from the two-object concept: a graphic object, recurring shape, custom texture, framing technique, line/path, unusual type treatment, recurring animation. Define where it appears and where it must *not* (overuse kills it). This is what makes the site one recognisable system.
 
+## 5.6 Motion tokens
+Motion is part of the system, not something added in Phase 9. Define in `tokens.css`:
+- **Easing:** `--ease-out`, `--ease-in-out`, `--ease-drawer` (Phase 7 defaults), plus one *signature* curve born from the concept (e.g. a mechanical "tick" vs an organic drift).
+- **Durations:** `--dur-press` (100–160ms), `--dur-ui` (150–250ms), `--dur-panel` (200–500ms), `--dur-reveal` (marketing).
+- **Stagger:** `--stagger-tight` / `--stagger-loose`.
+- **Scroll:** `--scrub` (smoothing, e.g. 0.5), `--pin-length` per chapter (in viewports, desktop/mobile), `--parallax-max` (e.g. 12%).
+- **Distances:** reveal offset (`--reveal-y`), magnetic pull, max tilt.
+- **Reduced-motion variants:** what each token becomes under `prefers-reduced-motion` (usually 0 distance, short opacity only).
+GSAP/Motion read these from CSS (`getComputedStyle`) or a shared `motion.ts`. Never hard-code a duration in a component.
+
+## 5.7 Component adaptation rules
+When a section will use a library component (Aceternity, Magic UI, React Bits, 21st.dev…), the design system decides how it looks, not the library. Follow `references/component-sources.md` → *adaptation rule*: map every colour/radius/shadow/font/duration to tokens, change at least one structural trait so it expresses the concept, delete unspecced extras, add reduced-motion + focus states, record source + license. Add a "Borrowed components" row in the preview page showing the library default next to our adapted version.
+
 ## Produce it
 - **Figma MCP available:** create/update the file: variables (colour, spacing, radius, type), text styles, component sheet, signature element page. Share the link.
 - **Otherwise:** `styles/tokens.css` (CSS custom properties) + optional Tailwind theme mapping + a `design-system.html` preview page (type scale, palette with contrast ratios, components in all states, signature element) shown as an artifact or file.

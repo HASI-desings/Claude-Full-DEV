@@ -5,6 +5,18 @@ It takes a website from a vague business idea all the way to a verified producti
 
 The skill is named **`full-dev`** (Claude's skill rules don't allow the word "claude" inside a skill name).
 
+**One skill, 95 skills inside:** `full-dev` bundles **95 specialist skills** in its library (plus the design-intelligence engine and the scroll kit), loaded only when a phase needs them.
+
+---
+
+## What's new: scroll, video, 3D and animated components
+
+- **95 bundled skills** (was 67): **+8** official GSAP skills (ScrollTrigger, timelines, plugins, React, performance), **+13** Three.js / React Three Fiber skills, **+7** scroll-storytelling and WebGL skills (scroll-scrubbed sequences, GSAP + Lenis systems, horizontal scenes, word reveals, Three.js scroll worlds, progress timelines, animation performance).
+- **`references/scroll-video-interaction.md`**: decision tree (CSS → Motion → GSAP → canvas/WebGL), performance budgets, mobile strategy, reduced-motion fallbacks, and recipes for pinned storytelling, horizontal scroll, text/mask reveals, parallax, scroll-scrubbed video, canvas image sequences, WebCodecs, cursor/magnetic, drag/physics, 3D on scroll and shared-element page transitions.
+- **`references/component-sources.md`**: verified catalog of animated component sources (21st.dev + Magic MCP, Aceternity, Magic UI, React Bits, Motion Primitives, Animata, Cult UI, Eldora, Skiper, Uiverse, Codrops, CodePen, GSAP, Motion, Lenis, Three.js/R3F/Drei, Spline, Rive, Lottie, Unicorn Studio) with license, install, stack and risk, plus the **adaptation rule**: every borrowed component is restyled to the project's tokens and concept. A library's default look is never shipped.
+- **`tools/scroll-kit/`**: 7 working single-file demos (scroll-scrubbed video, canvas image sequence, pinned storytelling, horizontal scroll, pure-CSS scroll timelines, Lenis + GSAP setup, 3D object on scroll) and 2 ffmpeg scripts (`prepare-scrub-video.sh` for all-keyframe MP4/WebM + poster, `extract-frames.sh` for WebP/AVIF frame sequences + manifest). Every demo was tested in Chromium on desktop and at 390 px, plus a reduced-motion pass.
+- Phases 3, 5, 7, 8, 9, 10 and 11, the toolkit, the anti-generic checklist and the motion-spec template now cover motion-reference capture, motion tokens, scroll/video spec rows, video/frame asset specs, heavy-effect build order and cleanup, and scroll-performance QA (60 fps on a mid-range phone, memory, resize/refresh, iOS Safari, reduced motion).
+
 ---
 
 ## What it does
@@ -19,7 +31,7 @@ The skill is named **`full-dev`** (Claude's skill rules don't allow the word "cl
 | 4 | Architecture & plan | Sitemap, user journeys, a purpose for every section, stack choice, data model, build plan |
 | 5 | Design system | Type, colour, layout, components and a signature brand element, backed by a bundled design-intelligence engine (194 palettes, font pairings, 130 UX rules, GSAP presets) |
 | 6 | Visual design | 6–7 genuinely different hero explorations, rendered, then every section designed |
-| 7 | Motion design | Spec for each animated element (trigger, from/to, duration, easing, reduced motion, mobile), following Emil Kowalski's motion rules |
+| 7 | Motion design | Spec for each animated element (trigger, from/to, duration, easing, reduced motion, mobile), following Emil Kowalski's motion rules, plus scroll/video/3D rows (trigger range, pin, scrub, frames, asset) |
 | 8 | Content & SEO | Real copy, metadata, JSON-LD, asset list |
 | 9 | Development | Next.js (or the leanest fitting stack), built section by section and compared against the design after each one |
 | 10 | Refinement & mobile | Screenshot-driven fixes; mobile layouts designed for mobile, not shrunk from desktop |
@@ -87,7 +99,8 @@ full-dev/
 ├── templates/               ← identity, concept, reference analysis, architecture,
 │                              design system, motion spec, QA report, handover
 ├── tools/ui-ux-pro-max/     ← searchable design data + Python CLI (no dependencies)
-└── library/                 ← 67 original specialist skills (as GUIDE.md), see library/INDEX.md
+├── tools/scroll-kit/        ← 7 working scroll/video/3D demos + ffmpeg scripts
+└── library/                 ← 95 original specialist skills (as GUIDE.md), see library/INDEX.md
 LICENSES/                    ← licenses of every included source
 full-dev.zip                 ← ready-to-upload skill package
 ```
@@ -110,5 +123,10 @@ Built on the creative workflow by **Hussnain Sohail (HASI Designs)**, merged wit
 | [vercel/vercel-plugin](https://github.com/vercel/vercel-plugin) | Apache-2.0 | Backend, env vars, CI/CD, verification, CDN caching |
 | [vercel-labs/agent-browser](https://github.com/vercel-labs/agent-browser) | Apache-2.0 | Browser automation |
 | [petrkindlmann/qa-skills](https://github.com/petrkindlmann/qa-skills) | MIT | Accessibility, visual, performance, security and E2E testing |
+| [greensock/gsap-skills](https://github.com/greensock/gsap-skills) | MIT | Official GSAP skills: core, timelines, ScrollTrigger, plugins, React, performance |
+| [cloudai-x/threejs-skills](https://github.com/cloudai-x/threejs-skills) | MIT | Three.js and React Three Fiber |
+| [MengTo/Skills](https://github.com/MengTo/Skills) | MIT | Scroll storytelling, scroll-scrubbed sequences, GSAP + Lenis systems, Three.js scroll worlds, animation performance |
+
+The scroll kit's demos were written for this repo. They load [GSAP](https://gsap.com) (free standard license), [Lenis](https://github.com/darkroomengineering/lenis) (MIT) and [three.js](https://threejs.org) (MIT) from a CDN.
 
 Original guides are included unmodified except that `SKILL.md` was renamed to `GUIDE.md` and internal links were updated to match.

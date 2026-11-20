@@ -29,6 +29,19 @@ For each section in plan order:
 
 No browser available? Ask the user for screenshots/recordings at each checkpoint, or deploy preview builds and verify via fetch.
 
+## 2b. Heavy effects (scroll-scrub, video, canvas, WebGL)
+Start from the matching `tools/scroll-kit/` demo and `references/scroll-video-interaction.md`. Order inside the section's build loop:
+1. **Static first** — final-state layout with real copy, the poster/still in place, correct on mobile and with JS off. This is also the reduced-motion version.
+2. **Motion** — entrance and hover motion from the spec.
+3. **Scrub / pin / 3D** — the scroll-bound layer last, behind `gsap.matchMedia()` (desktop / mobile / reduced-motion conditions) or `@supports (animation-timeline: view())`.
+
+Rules:
+- **Lazy-load the heavy parts:** dynamic-import Three.js/R3F, Lenis and big GSAP plugins only in the components that use them (`next/dynamic` with `ssr: false` for WebGL); start loading when the section is ~1 viewport away (IntersectionObserver `rootMargin`); fetch scrub video/frames only then, poster before.
+- **One loop:** drive Lenis from `gsap.ticker`; don't run separate rAF loops per effect; render WebGL on demand.
+- **Borrowed components:** install via the source's CLI into `components/ui/`, then adapt per `component-sources.md` before the section is reviewed. Keep license notices in `THIRD_PARTY_NOTICES.md`.
+- **Cleanup on route change / unmount:** `useGSAP()` or `gsap.context().revert()`; `mm.revert()`; kill ScrollTriggers you created; `gsap.ticker.remove()` + `lenis.destroy()`; cancel rAF; disconnect observers; remove listeners; `URL.revokeObjectURL`; dispose Three.js geometry/materials/textures/renderer. Then `ScrollTrigger.refresh()` once on the new page.
+- **Verify like the kit:** screenshots at 0/50/100% of each scroll effect on desktop and 390 px, reduced-motion pass, console clean.
+
 ## 3. Logic & backend
 - Test-first for real logic (pricing, cart, auth rules, data transforms, API handlers): failing test → minimal code → pass → refactor.
 - Server-side validation on every input (zod or similar); never trust the client.

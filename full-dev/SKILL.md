@@ -47,7 +47,7 @@ Work through phases in order. **Each ★ gate needs the user's explicit approval
 | 13 | Handover & maintenance | `references/phase-13-handover-maintenance.md` | README, ADRs, runbook, monitoring | — |
 | ∞ | Continuous innovation | `references/creative-innovation.md` | Applied at every phase | — |
 
-Read a phase file **when you enter that phase**, not before. For depth on any specialty, open the matching original skill from `library/INDEX.md`. For data-driven design choices, run the bundled engine in `tools/ui-ux-pro-max/` (see Phase 5).
+Read a phase file **when you enter that phase**, not before. For depth on any specialty, open the matching original skill from `library/INDEX.md`. For data-driven design choices, run the bundled engine in `tools/ui-ux-pro-max/` (see Phase 5). For scroll animation, scroll-scrubbed video, canvas sequences, 3D on scroll and interaction, use `references/scroll-video-interaction.md` + the working demos in `tools/scroll-kit/`; for ready-made animated components, `references/component-sources.md` (every borrowed component is adapted to our tokens and concept — never shipped in its library look).
 
 ---
 
@@ -84,4 +84,4 @@ This skill is designed to make Claude do the legwork a human designer does by ha
 
 ## 5. Library & credits
 
-`library/` holds 67 original specialist skills (Superpowers, Addy Osmani, Matt Pocock, PDLC, Anthropic, Emil Kowalski, Marketing Skills, Vercel, QA Skills) renamed to `GUIDE.md` so they load only through this skill. `library/INDEX.md` maps each to its phase. Licenses are in the repository's `LICENSES/` folder.
+`library/` holds 95 original specialist skills (Superpowers, Addy Osmani, Matt Pocock, PDLC, Anthropic, Emil Kowalski, Marketing Skills, Vercel, QA Skills, GSAP, Three.js, Meng To) renamed to `GUIDE.md` so they load only through this skill. `library/INDEX.md` maps each to its phase. Licenses are in the repository's `LICENSES/` folder.
